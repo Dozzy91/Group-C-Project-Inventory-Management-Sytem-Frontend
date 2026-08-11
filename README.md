@@ -1,0 +1,1 @@
+create an env file and add this to it: VITE_API_URL=http://127.0.0.1:3000
