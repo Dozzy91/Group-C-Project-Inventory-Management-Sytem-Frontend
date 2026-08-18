@@ -18,7 +18,7 @@ export default function Stores() {
     setError("");
     setBusy(true);
     try {
-      await api.createStore(session.id, session.password, newStoreName);
+      await api.createStore(newStoreName);
       setNewStoreName("");
       setShowCreate(false);
       await refreshProfile();
