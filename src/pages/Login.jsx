@@ -32,7 +32,7 @@ export default function Login() {
         <h1 style={{ fontSize: "1.5rem", marginBottom: 22 }}>Welcome back</h1>
         {error && <div className="error-banner">{error}</div>}
         <div className="field">
-          <label htmlFor="userName">Shop owner name</label>
+          <label htmlFor="userName">Your name</label>
           <input
             id="userName"
             value={userName}
