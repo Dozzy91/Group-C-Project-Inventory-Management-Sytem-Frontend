@@ -1,22 +1,19 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 
 const AuthContext = createContext(null);
-const STORAGE_KEY = "stockroom.session";
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  });
+  // `session` is just a lightweight "who am I" cache for the UI (name, id).
+  // It carries no secret - the actual credential is the httpOnly access
+  // token cookie, which JS can't read or write directly. On refresh we
+  // re-derive `session` by asking the backend who the cookie belongs to.
+  const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
-
-  const persist = (next) => {
-    if (next) localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    else localStorage.removeItem(STORAGE_KEY);
-    setSession(next);
-  };
+  const [checkingSession, setCheckingSession] = useState(true);
+  const navigate = useNavigate();
 
   const refreshProfile = useCallback(async () => {
     if (!session) {
@@ -34,23 +31,52 @@ export function AuthProvider({ children }) {
     }
   }, [session]);
 
+  // On first load (or full page refresh), ask the backend whether the
+  // access-token cookie is still valid and who it belongs to. This is how
+  // the frontend "remembers" a session across reloads without ever holding
+  // the token or password itself. If the 1-hour token has expired, this
+  // simply comes back unauthenticated and the user is sent to /login.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await api.me();
+        if (!cancelled) {
+          setSession({ id: res.data.id, userName: res.data.userName });
+        }
+      } catch {
+        if (!cancelled) setSession(null);
+      } finally {
+        if (!cancelled) setCheckingSession(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useEffect(() => {
     refreshProfile();
   }, [refreshProfile]);
 
-  // The API has no dedicated login route, so we authenticate by pulling the
-  // user list and matching credentials the same way the backend's own
-  // authMiddleware does (userName + password).
+  // Fired by api.js whenever any authenticated request comes back 401 -
+  // the access token expired (or was otherwise rejected) mid-session.
+  // Log the user out client-side and send them to the homepage, rather
+  // than leaving them stuck on a protected page silently failing.
+  useEffect(() => {
+    function handleExpired() {
+      setSession(null);
+      setProfile(null);
+      navigate("/", { replace: true, state: { sessionExpired: true } });
+    }
+    window.addEventListener("auth:expired", handleExpired);
+    return () => window.removeEventListener("auth:expired", handleExpired);
+  }, [navigate]);
+
   const login = async (userName, password) => {
-    const res = await api.getAllUsers();
-    const match = (res.data || []).find(
-      (u) =>
-        u.userName.toLowerCase() === userName.toLowerCase() &&
-        u.password === password,
-    );
-    if (!match) throw new Error("Incorrect shop name or password");
-    const next = { id: match.id, userName: match.userName, password };
-    persist(next);
+    const res = await api.login(userName, password);
+    const next = { id: res.data.id, userName: res.data.userName };
+    setSession(next);
     return next;
   };
 
@@ -60,16 +86,33 @@ export function AuthProvider({ children }) {
     // The account is created without its store attached server-side, so we
     // create the first store explicitly right after signing in.
     if (storeName) {
-      await api.createStore(next.id, password, storeName);
+      await api.createStore(storeName);
     }
     return next;
   };
 
-  const logout = () => persist(null);
+  const logout = async () => {
+    try {
+      await api.logout();
+    } finally {
+      setSession(null);
+      setProfile(null);
+    }
+  };
 
   return (
     <AuthContext.Provider
-      value={{ session, profile, loadingProfile, login, register, logout, refreshProfile }}
+      value={{
+        session,
+        profile,
+        loadingProfile,
+        checkingSession,
+        login,
+        register,
+        logout,
+        refreshProfile,
+        setSession,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -195,6 +195,9 @@ main {
   background: var(--ledger);
   color: #fff;
   cursor: pointer;
+  display: inline-block;
+  text-decoration: none;
+  line-height: 1.2;
   transition: transform 0.08s ease, background 0.15s ease;
 }
 
@@ -241,6 +244,11 @@ main {
 .btn-sm {
   padding: 6px 12px;
   font-size: 0.8rem;
+}
+
+.btn-lg {
+  padding: 13px 26px;
+  font-size: 1rem;
 }
 
 .btn:disabled {
@@ -426,6 +434,42 @@ main {
   gap: 14px;
 }
 
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.password-toggle:hover {
+  color: var(--ink);
+  background: var(--sage-line);
+}
+
+.password-toggle:focus-visible {
+  outline: 2px solid var(--amber-deep);
+  outline-offset: 1px;
+}
+
 .form-foot {
   display: flex;
   align-items: center;
@@ -489,6 +533,102 @@ main {
   margin-bottom: 8px;
 }
 
+/* ===== Store totals ===== */
+.store-totals {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  padding: 16px 20px;
+  border: 1.5px solid var(--sage-line);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+}
+
+.store-totals > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.store-totals-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+
+.store-totals-value {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ledger);
+}
+
+/* ===== Retrieve batch form ===== */
+.retrieve-line {
+  display: grid;
+  grid-template-columns: 1fr 100px auto;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+
+.retrieve-qty input {
+  width: 100%;
+}
+
+.retrieve-remove {
+  margin-bottom: 16px;
+  padding: 0 10px;
+  height: 40px;
+}
+
+.retrieve-form > .btn {
+  margin-bottom: 18px;
+}
+
+/* ===== Retrieval history ===== */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 360px;
+  overflow-y: auto;
+  margin-bottom: 18px;
+}
+
+.history-entry {
+  border: 1.5px solid var(--sage-line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  background: var(--paper-raised);
+}
+
+.history-entry-head {
+  margin-bottom: 6px;
+}
+
+.history-date {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.history-entry ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-entry li {
+  font-size: 0.92rem;
+  color: var(--ledger);
+}
+
 /* ===== Toolbar ===== */
 .toolbar {
   display: flex;
@@ -534,4 +674,312 @@ main {
   width: 100%;
   max-width: 440px;
   padding: 26px 26px 22px;
+}
+
+/* Lets the ledger table scroll horizontally instead of squashing on
+   medium-width screens, before the stacked-card layout kicks in below. */
+.ledger-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 720px) {
+  .topbar {
+    padding: 14px 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .topbar nav {
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  main {
+    padding: 24px 16px 60px;
+  }
+
+  .page-head {
+    align-items: stretch;
+  }
+
+  .page-head > div:last-child {
+    flex-wrap: wrap;
+  }
+
+  .page-head h1 {
+    font-size: 1.6rem;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .retrieve-line {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .retrieve-remove {
+    margin-bottom: 4px;
+    width: 100%;
+  }
+
+  .store-totals {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .form-card {
+    padding: 22px 18px 20px;
+  }
+
+  .modal-backdrop {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modal-card {
+    max-width: 100%;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}
+
+/* Below this width the ledger table stops being a table at all and
+   becomes a stack of item cards - one per row - since a 7-column table
+   simply can't fit a phone screen without becoming unreadable. */
+@media (max-width: 640px) {
+  .ledger-scroll {
+    overflow-x: visible;
+  }
+
+  .ledger thead {
+    display: none;
+  }
+
+  .ledger,
+  .ledger tbody,
+  .ledger tr,
+  .ledger td {
+    display: block;
+    width: 100%;
+  }
+
+  .ledger {
+    border: none;
+    background: transparent;
+  }
+
+  .ledger tr {
+    background: var(--paper-raised);
+    border: 1px solid var(--sage-line);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+    padding: 4px 14px;
+    box-shadow: var(--shadow-tag);
+  }
+
+  .ledger tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .ledger td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--sage-line);
+    text-align: right;
+  }
+
+  .ledger tr td:last-child {
+    border-bottom: none;
+  }
+
+  /* Recreate the missing column header inline, from the data-label
+     attribute set on each <td> in StoreDetail.jsx. */
+  .ledger td[data-label]::before {
+    content: attr(data-label);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.68rem;
+    color: var(--ink-soft);
+    text-align: left;
+  }
+
+  .ledger td[data-label=""]::before {
+    content: none;
+  }
+
+  .row-actions {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 420px) {
+  .store-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar .brand {
+    font-size: 1.15rem;
+  }
+
+  .who {
+    display: none;
+  }
+}
+
+/* ===== Landing page ===== */
+.session-expired-banner {
+  background: var(--rust-soft);
+  border: 1.5px solid var(--rust);
+  color: var(--rust);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  margin-bottom: 26px;
+}
+
+.landing-hero {
+  padding: 20px 0 48px;
+  max-width: 720px;
+}
+
+.landing-hero h1 {
+  font-size: 2.6rem;
+  line-height: 1.15;
+  margin: 6px 0 18px;
+}
+
+.landing-lede {
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+  margin: 0 0 28px;
+  max-width: 560px;
+}
+
+.landing-cta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.landing-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  margin-bottom: 56px;
+}
+
+.landing-feature {
+  padding: 22px 20px;
+}
+
+.landing-feature h3 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.landing-feature p {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.landing-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  padding: 40px 0;
+  border-top: 1px solid var(--sage-line);
+  border-bottom: 1px solid var(--sage-line);
+  margin-bottom: 56px;
+}
+
+.landing-split-panel h2 {
+  font-size: 1.4rem;
+  margin: 6px 0 14px;
+  line-height: 1.25;
+}
+
+.landing-split-panel p {
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.landing-gain {
+  margin-bottom: 56px;
+}
+
+.landing-gain h2 {
+  font-size: 1.6rem;
+  margin: 6px 0 22px;
+}
+
+.landing-gain-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+}
+
+.landing-gain-list li {
+  position: relative;
+  padding-left: 22px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.landing-gain-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 8px;
+  height: 8px;
+  background: var(--amber);
+  border-radius: 2px;
+}
+
+.landing-footer-cta {
+  text-align: center;
+  padding: 40px 20px 56px;
+  border: 1.5px dashed var(--sage-line);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+}
+
+.landing-footer-cta h2 {
+  font-size: 1.6rem;
+  margin-bottom: 20px;
+}
+
+.landing-footer-cta .landing-cta {
+  justify-content: center;
+}
+
+@media (max-width: 720px) {
+  .landing-hero h1 {
+    font-size: 2rem;
+  }
+
+  .landing-split {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+
+  .landing-gain-list {
+    grid-template-columns: 1fr;
+  }
 }

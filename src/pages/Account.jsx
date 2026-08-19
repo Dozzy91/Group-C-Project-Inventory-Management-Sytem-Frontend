@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api";
+import PasswordField from "../components/PasswordField";
 
 export default function Account() {
-  const { session, profile, logout, refreshProfile } = useAuth();
+  const { session, profile, logout, refreshProfile, setSession } = useAuth();
   const navigate = useNavigate();
 
   const [userName, setUserName] = useState(session?.userName || "");
@@ -28,20 +29,15 @@ export default function Account() {
         return;
       }
 
-      await api.editUser(session.id, session.password, payload);
+      const res = await api.editUser(payload);
 
-      // session is keyed on the current password, so update local storage
-      // to match whatever changed.
-      const nextSession = {
-        ...session,
-        userName: payload.userName || session.userName,
-        password: payload.password || session.password,
-      };
-      localStorage.setItem("stockroom.session", JSON.stringify(nextSession));
+      // The access token cookie is unaffected by a name/password change -
+      // it's still valid until it naturally expires in an hour. Just
+      // update the lightweight session cache the UI reads from.
+      setSession({ id: res.data.id, userName: res.data.userName });
       setPassword("");
       setSuccess("Account updated.");
       await refreshProfile();
-      window.location.reload(); // simplest way to refresh session in context
     } catch (err) {
       setError(err.message);
     } finally {
@@ -52,9 +48,9 @@ export default function Account() {
   const handleDelete = async () => {
     if (!window.confirm("Delete your account? Your stores will remain but you'll lose access.")) return;
     try {
-      await api.deleteUser(session.id, session.password);
-      logout();
-      navigate("/login");
+      await api.deleteUser();
+      await logout();
+      navigate("/");
     } catch (err) {
       alert(err.message);
     }
@@ -79,12 +75,12 @@ export default function Account() {
           </div>
           <div className="field">
             <label htmlFor="password">New password</label>
-            <input
+            <PasswordField
               id="password"
-              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Leave blank to keep current"
+              autoComplete="new-password"
             />
           </div>
         </div>
